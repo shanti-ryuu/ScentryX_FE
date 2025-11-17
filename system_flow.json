@@ -1,0 +1,308 @@
+{
+  "system": "ScentryX Mobile - IoT Gas Leak Detection",
+  "flow": {
+    "authentication": {
+      "login": {
+        "request": {
+          "email": "user@example.com",
+          "password": "securePassword"
+        },
+        "response": {
+          "success": true,
+          "message": "Login successful",
+          "statusCode": 200,
+          "data": {
+            "user": {
+              "id": "user_123",
+              "email": "user@example.com",
+              "fullName": "John Doe",
+              "phoneNumber": "+1234567890",
+              "role": "admin",
+              "profilePicture": "https://example.com/pic.jpg",
+              "isVerified": true,
+              "createdAt": "2024-01-15T10:30:00Z"
+            },
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "refreshToken": "refresh_token_123"
+          }
+        }
+      }
+    },
+    "device_management": {
+      "list_devices": {
+        "response": {
+          "success": true,
+          "message": "Devices fetched",
+          "statusCode": 200,
+          "data": [
+            {
+              "id": "device_123",
+              "deviceId": "AA:BB:CC:DD:EE:FF",
+              "deviceName": "Living Room Sensor",
+              "deviceType": "MQ-5",
+              "location": "Living Room",
+              "status": "active",
+              "alertThreshold": 500,
+              "lastSeen": "2024-11-17T10:45:30Z",
+              "isOnline": true,
+              "createdAt": "2024-06-20T08:15:00Z"
+            },
+            {
+              "id": "device_124",
+              "deviceId": "AA:BB:CC:DD:EE:F0",
+              "deviceName": "Kitchen Sensor",
+              "deviceType": "MQ-5",
+              "location": "Kitchen",
+              "status": "active",
+              "alertThreshold": 500,
+              "lastSeen": "2024-11-17T10:44:15Z",
+              "isOnline": true,
+              "createdAt": "2024-06-20T09:20:00Z"
+            }
+          ],
+          "meta": {
+            "total": 2,
+            "page": 1,
+            "limit": 10
+          }
+        }
+      },
+      "add_device": {
+        "request": {
+          "deviceName": "Bedroom Sensor",
+          "deviceType": "MQ-5",
+          "location": "Bedroom",
+          "alertThreshold": 500
+        },
+        "response": {
+          "success": true,
+          "message": "Device created successfully",
+          "statusCode": 201,
+          "data": {
+            "id": "device_125",
+            "deviceId": "AA:BB:CC:DD:EE:F1",
+            "deviceName": "Bedroom Sensor",
+            "deviceType": "MQ-5",
+            "location": "Bedroom",
+            "status": "active",
+            "alertThreshold": 500,
+            "lastSeen": null,
+            "isOnline": false,
+            "createdAt": "2024-11-17T10:50:00Z"
+          }
+        }
+      }
+    },
+    "gas_readings": {
+      "get_latest_readings": {
+        "response": {
+          "success": true,
+          "message": "Latest readings retrieved",
+          "statusCode": 200,
+          "data": [
+            {
+              "id": "reading_001",
+              "deviceId": "device_123",
+              "gasLevelPpm": 250,
+              "status": "safe",
+              "temperature": 22.5,
+              "humidity": 45.3,
+              "timestamp": "2024-11-17T10:50:00Z"
+            },
+            {
+              "id": "reading_002",
+              "deviceId": "device_124",
+              "gasLevelPpm": 450,
+              "status": "warning",
+              "temperature": 24.1,
+              "humidity": 48.7,
+              "timestamp": "2024-11-17T10:50:05Z"
+            },
+            {
+              "id": "reading_003",
+              "deviceId": "device_125",
+              "gasLevelPpm": 750,
+              "status": "danger",
+              "temperature": 25.3,
+              "humidity": 52.1,
+              "timestamp": "2024-11-17T10:50:10Z"
+            }
+          ],
+          "meta": {
+            "interval": 5,
+            "maxPPM": 1000,
+            "safeThreshold": 300,
+            "dangerThreshold": 500
+          }
+        }
+      },
+      "get_readings_history": {
+        "response": {
+          "success": true,
+          "message": "Readings history retrieved",
+          "statusCode": 200,
+          "data": [
+            {
+              "id": "reading_hist_001",
+              "deviceId": "device_123",
+              "gasLevelPpm": 200,
+              "status": "safe",
+              "temperature": 21.8,
+              "humidity": 44.2,
+              "timestamp": "2024-11-17T09:00:00Z"
+            },
+            {
+              "id": "reading_hist_002",
+              "deviceId": "device_123",
+              "gasLevelPpm": 320,
+              "status": "warning",
+              "temperature": 22.1,
+              "humidity": 44.8,
+              "timestamp": "2024-11-17T09:05:00Z"
+            }
+          ],
+          "meta": {
+            "total": 2,
+            "page": 1,
+            "limit": 50,
+            "startDate": "2024-11-17T00:00:00Z",
+            "endDate": "2024-11-17T23:59:59Z"
+          }
+        }
+      }
+    },
+    "alerts": {
+      "get_alerts": {
+        "response": {
+          "success": true,
+          "message": "Alerts retrieved",
+          "statusCode": 200,
+          "data": [
+            {
+              "id": "alert_001",
+              "deviceId": "device_123",
+              "alertType": "danger",
+              "severity": "critical",
+              "message": "High gas concentration detected",
+              "status": "active",
+              "resolvedAt": null,
+              "createdAt": "2024-11-17T10:45:00Z"
+            },
+            {
+              "id": "alert_002",
+              "deviceId": "device_124",
+              "alertType": "warning",
+              "severity": "medium",
+              "message": "Gas level approaching threshold",
+              "status": "resolved",
+              "resolvedAt": "2024-11-17T10:48:00Z",
+              "createdAt": "2024-11-17T10:40:00Z"
+            }
+          ],
+          "meta": {
+            "activeAlerts": 1,
+            "resolvedAlerts": 1,
+            "totalAlerts": 2
+          }
+        }
+      },
+      "acknowledge_alert": {
+        "request": {
+          "alertId": "alert_001"
+        },
+        "response": {
+          "success": true,
+          "message": "Alert acknowledged",
+          "statusCode": 200,
+          "data": {
+            "id": "alert_001",
+            "status": "acknowledged",
+            "acknowledgedAt": "2024-11-17T10:50:00Z"
+          }
+        }
+      }
+    },
+    "notifications": {
+      "push_notification_example": {
+        "title": "Critical Alert",
+        "body": "High gas concentration detected in Living Room",
+        "data": {
+          "alertId": "alert_001",
+          "deviceId": "device_123",
+          "severity": "critical",
+          "gasLevelPpm": 750
+        }
+      }
+    },
+    "user_profile": {
+      "get_profile": {
+        "response": {
+          "success": true,
+          "message": "Profile retrieved",
+          "statusCode": 200,
+          "data": {
+            "id": "user_123",
+            "email": "user@example.com",
+            "fullName": "John Doe",
+            "phoneNumber": "+1234567890",
+            "role": "admin",
+            "profilePicture": "https://example.com/pic.jpg",
+            "isVerified": true,
+            "createdAt": "2024-01-15T10:30:00Z",
+            "settings": {
+              "notificationsEnabled": true,
+              "theme": "dark",
+              "language": "en"
+            }
+          }
+        }
+      },
+      "update_profile": {
+        "request": {
+          "fullName": "John Doe",
+          "phoneNumber": "+1234567890"
+        },
+        "response": {
+          "success": true,
+          "message": "Profile updated",
+          "statusCode": 200,
+          "data": {
+            "id": "user_123",
+            "email": "user@example.com",
+            "fullName": "John Doe",
+            "phoneNumber": "+1234567890",
+            "role": "admin"
+          }
+        }
+      }
+    }
+  },
+  "architecture": {
+    "layers": {
+      "presentation": "Flutter UI Screens",
+      "state_management": "Provider Pattern",
+      "services": {
+        "api_service": "Dio HTTP Client",
+        "auth_service": "Firebase Auth + JWT",
+        "firebase_service": "Realtime Database",
+        "notification_service": "FCM + Local Notifications",
+        "storage_service": "SharedPreferences + Secure Storage"
+      }
+    },
+    "data_models": [
+      "User",
+      "Device",
+      "Reading",
+      "Alert",
+      "ApiResponse"
+    ],
+    "api_endpoints": {
+      "base_url": "http://10.0.2.2:5000/api",
+      "auth": "/auth/login",
+      "devices": "/devices",
+      "readings": "/readings",
+      "alerts": "/alerts",
+      "users": "/users"
+    }
+  }
+}
