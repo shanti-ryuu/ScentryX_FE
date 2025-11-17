@@ -52,7 +52,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {`
+  Widget build(BuildContext context) {
     final provider = context.watch<AlertProvider>();
     final alert = _alert;
 

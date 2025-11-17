@@ -1,8 +1,27 @@
+import 'package:flutter/foundation.dart';
+
 class AppConstants {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:5000/api',
   );
+
+  static String resolveApiBaseUrl([String? environmentValue]) {
+    if (environmentValue != null && environmentValue.isNotEmpty) {
+      return environmentValue;
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:5000/api';
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'http://10.0.2.2:5000/api';
+      default:
+        return 'http://localhost:5000/api';
+    }
+  }
 
   static const int safeThreshold = 300;
   static const int dangerThreshold = 500;

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../config/constants.dart';
 import '../models/api_response.dart';
 import 'storage_service.dart';
 
@@ -20,7 +21,8 @@ class ApiService {
       return _instance!;
     }
 
-    final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:5000/api';
+    final envValue = dotenv.env['API_BASE_URL'];
+    final baseUrl = AppConstants.resolveApiBaseUrl(envValue);
 
     final dio = Dio(
       BaseOptions(
