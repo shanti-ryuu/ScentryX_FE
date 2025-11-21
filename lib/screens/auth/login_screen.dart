@@ -150,31 +150,57 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: _rememberMe,
-                              onChanged: (value) {
-                                setState(() {
-                                  _rememberMe = value ?? false;
-                                });
-                              },
-                            ),
-                            const Text('Remember me'),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(
-                              AppRoutes.forgotPassword,
-                            );
-                          },
-                          child: const Text('Forgot Password?'),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isTight = constraints.maxWidth < 360;
+                        final content = [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _rememberMe = value ?? false;
+                                  });
+                                },
+                              ),
+                              const Text('Remember me'),
+                            ],
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pushNamed(
+                                AppRoutes.forgotPassword,
+                              );
+                            },
+                            child: const Text('Forgot Password?'),
+                          ),
+                        ];
+
+                        if (isTight) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: content
+                                .map((child) => Padding(
+                                      padding:
+                                          const EdgeInsets.symmetric(vertical: 4),
+                                      child: Align(
+                                        alignment: child is TextButton
+                                            ? Alignment.centerRight
+                                            : Alignment.centerLeft,
+                                        child: child,
+                                      ),
+                                    ))
+                                .toList(),
+                          );
+                        }
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: content,
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     if (auth.isLoading)

@@ -48,8 +48,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     if (device != null) {
       _device = device;
       await readingProvider.fetchLatestReading(device.id);
-      await readingProvider.fetchReadings(device.id, page: 1);
-      await readingProvider.fetchStatistics(device.id, hours: 24);
+      await readingProvider.fetchReadings(device.id);
+      await readingProvider.fetchStatistics(device.id);
       readingProvider.subscribeToLiveReadings(device.id);
     }
 
@@ -215,7 +215,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
             if (provider.error != null && provider.readings.isEmpty) {
               return ErrorView(
                 message: provider.error!,
-                onRetry: () => provider.fetchReadings(device.id, page: 1),
+                onRetry: () => provider.fetchReadings(device.id),
               );
             }
             if (provider.readings.isEmpty) {

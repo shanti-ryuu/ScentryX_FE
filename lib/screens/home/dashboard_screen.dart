@@ -38,19 +38,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final readingProvider = context.read<ReadingProvider>();
     final alertProvider = context.read<AlertProvider>();
 
-    await deviceProvider.fetchDevices();
-    final device = deviceProvider.selectedDevice;
+    try {
+      await deviceProvider.fetchDevices();
+      final device = deviceProvider.selectedDevice;
 
-    if (device != null) {
-      await _loadDeviceData(device);
-      readingProvider.subscribeToLiveReadings(device.id);
-      await alertProvider.fetchUnreadCount();
-    }
-
-    if (mounted) {
-      setState(() {
-        _initialized = true;
-      });
+      if (device != null) {
+        await _loadDeviceData(device);
+        readingProvider.subscribeToLiveReadings(device.id);
+        await alertProvider.fetchUnreadCount();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _initialized = true;
+        });
+      }
     }
   }
 
@@ -60,10 +62,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     await Future.wait([
       readingProvider.fetchLatestReading(device.id),
-      readingProvider.fetchReadings(device.id, page: 1),
-      readingProvider.fetchStatistics(device.id, hours: 24),
+      readingProvider.fetchReadings(device.id),
+      readingProvider.fetchStatistics(device.id),
       alertProvider.fetchAlerts(deviceId: device.id, page: 1),
-    ]);
+    ].map((future) => future.catchError((_) {})));
   }
 
   Future<void> _onRefresh() async {
@@ -204,14 +206,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Device',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  DropdownButton<Device>(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 360;
+                  final dropdown = DropdownButton<Device>(
+                    isExpanded: true,
                     value: selectedDevice,
                     hint: const Text('Select device'),
                     items: devices
@@ -225,8 +224,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onChanged: (device) {
                       _onDeviceChanged(device);
                     },
-                  ),
-                ],
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Device',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        dropdown,
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Device',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(child: dropdown),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 16),
               if (selectedDevice == null)
@@ -285,44 +310,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: QuickStatsCard(
-                title: 'PPM',
-                value: ppm.toString(),
-                subtitle: 'Current gas level',
-                icon: Icons.speed,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: QuickStatsCard(
-                title: 'Status',
-                value: status.toUpperCase(),
-                subtitle: device.isOnline ? 'Device online' : 'Device offline',
-                icon: Icons.info_outline,
-                color: status == 'danger'
-                    ? Colors.red
-                    : status == 'warning'
-                        ? Colors.orange
-                        : Colors.green,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: QuickStatsCard(
-                title: 'Device',
-                value: device.statusLabel,
-                subtitle: device.location,
-                icon: device.isOnline
-                    ? Icons.check_circle
-                    : Icons.cloud_off,
-                color: device.isOnline ? Colors.green : Colors.grey,
-              ),
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 520;
+            final cardWidth = isCompact
+                ? constraints.maxWidth
+                : (constraints.maxWidth - 16) / 3;
+
+            Widget buildCard(Widget child) {
+              return SizedBox(
+                width: isCompact ? double.infinity : cardWidth,
+                child: child,
+              );
+            }
+
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                buildCard(
+                  QuickStatsCard(
+                    title: 'PPM',
+                    value: ppm.toString(),
+                    subtitle: 'Current gas level',
+                    icon: Icons.speed,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                buildCard(
+                  QuickStatsCard(
+                    title: 'Status',
+                    value: status.toUpperCase(),
+                    subtitle:
+                        device.isOnline ? 'Device online' : 'Device offline',
+                    icon: Icons.info_outline,
+                    color: status == 'danger'
+                        ? Colors.red
+                        : status == 'warning'
+                            ? Colors.orange
+                            : Colors.green,
+                  ),
+                ),
+                buildCard(
+                  QuickStatsCard(
+                    title: 'Device',
+                    value: device.statusLabel,
+                    subtitle: device.location,
+                    icon:
+                        device.isOnline ? Icons.check_circle : Icons.cloud_off,
+                    color: device.isOnline ? Colors.green : Colors.grey,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 24),
         Text(
@@ -338,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (provider.error != null && provider.readings.isEmpty) {
               return ErrorView(
                 message: provider.error!,
-                onRetry: () => provider.fetchReadings(device.id, page: 1),
+                onRetry: () => provider.fetchReadings(device.id),
               );
             }
             if (provider.readings.isEmpty) {

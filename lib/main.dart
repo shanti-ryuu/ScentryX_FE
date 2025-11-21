@@ -11,6 +11,7 @@ import 'providers/auth_provider.dart';
 import 'providers/device_provider.dart';
 import 'providers/reading_provider.dart';
 import 'providers/alert_provider.dart';
+import 'providers/network_provider.dart';
 import 'services/firebase_service.dart';
 import 'services/notification_service.dart';
 import 'services/storage_service.dart';
@@ -75,6 +76,9 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => AlertProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NetworkProvider(),
         ),
       ],
       child: const ScentryXApp(),

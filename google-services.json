@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "544378809746",
+    "project_id": "scentryx-9dd99",
+    "storage_bucket": "scentryx-9dd99.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544378809746:android:a25172bd132ad14fbc254b",
+        "android_client_info": {
+          "package_name": "com.scentryx.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBerQ1YSBfR5442I9J3kRdOOzs-qRzZqJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

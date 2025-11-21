@@ -5,6 +5,7 @@ import 'config/theme.dart';
 import 'config/routes.dart';
 import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
+import 'widgets/offline_banner.dart';
 
 class ScentryXApp extends StatelessWidget {
   const ScentryXApp({super.key});
@@ -22,6 +23,19 @@ class ScentryXApp extends StatelessWidget {
           home: const SplashScreen(),
           routes: AppRoutes.routes,
           onGenerateRoute: AppRoutes.onGenerateRoute,
+          builder: (context, child) {
+            return Stack(
+              children: [
+                child ?? const SizedBox.shrink(),
+                const Align(
+                  alignment: Alignment.topCenter,
+                  child: SafeArea(
+                    child: OfflineBanner(),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );

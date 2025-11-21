@@ -51,9 +51,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       return;
     }
 
+    final name = _nameController.text.trim();
     final data = <String, dynamic>{
       'deviceId': _macController.text.trim(),
-      'deviceName': _nameController.text.trim(),
+      'deviceName': name,
+      'name': name,
       'location': _locationController.text.trim(),
       'alertThreshold': _threshold.toInt(),
     };

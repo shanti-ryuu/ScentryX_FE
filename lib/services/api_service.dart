@@ -61,7 +61,14 @@ class ApiService {
   ApiResponse<dynamic> _handleResponse(Response<dynamic> response) {
     final body = response.data;
     if (body is Map<String, dynamic>) {
-      return ApiResponse<dynamic>.fromJson(body, (obj) => obj);
+      final normalized = Map<String, dynamic>.from(body);
+      normalized['data'] ??=
+          normalized['device'] ??
+              normalized['devices'] ??
+              normalized['alert'] ??
+              normalized['alerts'] ??
+              normalized['result'];
+      return ApiResponse<dynamic>.fromJson(normalized, (obj) => obj);
     }
 
     final ok = response.statusCode != null &&
@@ -149,76 +156,70 @@ class ApiService {
   }
 
   Future<ApiResponse<dynamic>> register(Map<String, dynamic> data) {
-    return _request('POST', '/auth/register', data: data);
+    return _request('POST', '/api/auth/register', data: data);
   }
 
   Future<ApiResponse<dynamic>> login(Map<String, dynamic> data) {
-    return _request('POST', '/auth/login', data: data);
+    return _request('POST', '/api/auth/login', data: data);
   }
 
   Future<ApiResponse<dynamic>> getProfile() {
-    return _request('GET', '/auth/profile');
+    return _request('GET', '/api/auth/profile');
   }
 
   Future<ApiResponse<dynamic>> updateProfile(Map<String, dynamic> data) {
-    return _request('PUT', '/auth/profile', data: data);
+    return _request('PUT', '/api/auth/profile', data: data);
   }
 
   Future<ApiResponse<dynamic>> updateFCMToken(String token) {
     return _request(
       'POST',
-      '/auth/fcm-token',
-      data: <String, dynamic>{'token': token},
+      '/api/auth/fcm-token',
+      data: {'token': token},
     );
   }
 
   Future<ApiResponse<dynamic>> registerDevice(Map<String, dynamic> data) {
-    return _request('POST', '/devices', data: data);
+    return _request('POST', '/api/devices', data: data);
   }
 
   Future<ApiResponse<dynamic>> getDevices() {
-    return _request('GET', '/devices');
+    return _request('GET', '/api/devices');
   }
 
   Future<ApiResponse<dynamic>> getDevice(String deviceId) {
-    return _request('GET', '/devices/$deviceId');
+    return _request('GET', '/api/devices/$deviceId');
   }
 
   Future<ApiResponse<dynamic>> updateDevice(
     String deviceId,
     Map<String, dynamic> data,
   ) {
-    return _request('PUT', '/devices/$deviceId', data: data);
+    return _request('PUT', '/api/devices/$deviceId', data: data);
   }
 
   Future<ApiResponse<dynamic>> deleteDevice(String deviceId) {
-    return _request('DELETE', '/devices/$deviceId');
+    return _request('DELETE', '/api/devices/$deviceId');
   }
 
-  Future<ApiResponse<dynamic>> getReadings(
-    String deviceId, {
-    int page = 1,
-  }) {
-    return _request(
-      'GET',
-      '/readings/$deviceId',
-      query: <String, dynamic>{'page': page},
-    );
+  Future<ApiResponse<dynamic>> getReadings(String deviceId) {
+    return _request('GET', '/api/gas/$deviceId');
   }
 
   Future<ApiResponse<dynamic>> getLatestReading(String deviceId) {
-    return _request('GET', '/readings/$deviceId/latest');
+    return _request('GET', '/api/gas/$deviceId');
   }
 
-  Future<ApiResponse<dynamic>> getStatistics(
-    String deviceId, {
-    int hours = 24,
-  }) {
-    return _request(
-      'GET',
-      '/readings/$deviceId/statistics',
-      query: <String, dynamic>{'hours': hours},
-    );
+  Future<ApiResponse<dynamic>> getStatistics(String deviceId) {
+    return _request('GET', '/api/gas/$deviceId');
+  }
+
+  Future<ApiResponse<dynamic>> getAllGasReadings() {
+    return _request('GET', '/api/gas');
+  }
+
+  Future<ApiResponse<dynamic>> createGasReading(Map<String, dynamic> data) {
+    return _request('POST', '/api/gas', data: data);
   }
 
   Future<ApiResponse<dynamic>> getAlerts({
@@ -233,18 +234,18 @@ class ApiService {
     if (alertType != null) {
       query['alertType'] = alertType;
     }
-    return _request('GET', '/alerts', query: query);
+    return _request('GET', '/api/alerts', query: query);
   }
 
   Future<ApiResponse<dynamic>> getUnreadCount() {
-    return _request('GET', '/alerts/unread-count');
+    return _request('GET', '/api/alerts/unread-count');
   }
 
   Future<ApiResponse<dynamic>> acknowledgeAlert(String alertId) {
-    return _request('POST', '/alerts/$alertId/acknowledge');
+    return _request('POST', '/api/alerts/$alertId/acknowledge');
   }
 
   Future<ApiResponse<dynamic>> deleteAlert(String alertId) {
-    return _request('DELETE', '/alerts/$alertId');
+    return _request('DELETE', '/api/alerts/$alertId');
   }
 }

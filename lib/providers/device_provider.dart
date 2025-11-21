@@ -34,7 +34,11 @@ class DeviceProvider extends ChangeNotifier {
         return;
       }
 
-      final data = res.data;
+      dynamic data = res.data;
+      if (data == null && res.raw is Map<String, dynamic>) {
+        final raw = res.raw as Map<String, dynamic>;
+        data = raw['devices'] ?? raw['data'];
+      }
       List<dynamic> list;
       if (data is List) {
         list = data;
@@ -93,7 +97,10 @@ class DeviceProvider extends ChangeNotifier {
       }
 
       dynamic data = res.data;
-      if (data is Map<String, dynamic> && data['device'] is Map<String, dynamic>) {
+      if (data == null && res.raw is Map<String, dynamic>) {
+        final raw = res.raw as Map<String, dynamic>;
+        data = raw['device'] ?? raw['data'];
+      } else if (data is Map<String, dynamic> && data['device'] is Map<String, dynamic>) {
         data = data['device'];
       }
 
@@ -136,11 +143,17 @@ class DeviceProvider extends ChangeNotifier {
         return;
       }
 
+      dynamic payload = res.data;
+      if (payload == null && res.raw is Map<String, dynamic>) {
+        final raw = res.raw as Map<String, dynamic>;
+        payload = raw['device'] ?? raw['data'];
+      }
+
       Map<String, dynamic>? json;
-      if (res.data is Map<String, dynamic>) {
-        json = res.data as Map<String, dynamic>;
-      } else if (res.data is Map) {
-        json = Map<String, dynamic>.from(res.data as Map);
+      if (payload is Map<String, dynamic>) {
+        json = payload;
+      } else if (payload is Map) {
+        json = Map<String, dynamic>.from(payload);
       }
 
       if (json == null) {

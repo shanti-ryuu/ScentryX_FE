@@ -10,18 +10,18 @@ class Device {
   final bool isOnline;
   final DateTime createdAt;
 
-  const Device({
-    required this.id,
-    required this.deviceId,
-    required this.deviceName,
-    required this.deviceType,
-    required this.location,
-    required this.status,
-    required this.alertThreshold,
+  Device({
+    this.id = '',
+    this.deviceId = '',
+    this.deviceName = '',
+    this.deviceType = 'sensor',
+    this.location = '',
+    this.status = 'offline',
+    this.alertThreshold = 300,
     this.lastSeen,
-    required this.isOnline,
-    required this.createdAt,
-  });
+    this.isOnline = false,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   bool get isOffline => !isOnline;
 
@@ -50,7 +50,7 @@ class Device {
       createdAt = DateTime.now();
     }
 
-    final status = (json['status'] ?? 'offline').toString();
+    final status = (json['status'] ?? 'online').toString();
     final isOnlineField = json['isOnline'];
     final bool isOnline = isOnlineField is bool
         ? isOnlineField
@@ -60,10 +60,10 @@ class Device {
       id: (json['id'] ?? json['_id'] ?? '').toString(),
       deviceId: (json['deviceId'] ?? json['macAddress'] ?? '').toString(),
       deviceName: (json['deviceName'] ?? json['name'] ?? '').toString(),
-      deviceType: (json['deviceType'] ?? 'sensor').toString(),
+      deviceType: (json['deviceType'] ?? json['type'] ?? 'sensor').toString(),
       location: (json['location'] ?? '').toString(),
       status: status,
-      alertThreshold: (json['alertThreshold'] as num?)?.toInt() ?? 0,
+      alertThreshold: (json['alertThreshold'] as num?)?.toInt() ?? 50,
       lastSeen: lastSeen,
       isOnline: isOnline,
       createdAt: createdAt,

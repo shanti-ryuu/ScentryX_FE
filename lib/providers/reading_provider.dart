@@ -38,14 +38,17 @@ class ReadingProvider extends ChangeNotifier {
         return;
       }
 
-      Map<String, dynamic>? json;
       final data = res.data;
-      if (data is Map<String, dynamic>) {
+      Map<String, dynamic>? json;
+      if (data is List && data.isNotEmpty) {
+        final item = data.first;
+        if (item is Map<String, dynamic>) {
+          json = item;
+        } else if (item is Map) {
+          json = Map<String, dynamic>.from(item);
+        }
+      } else if (data is Map<String, dynamic>) {
         json = data;
-      } else if (data is Map) {
-        json = Map<String, dynamic>.from(data);
-      } else if (data is Map<String, dynamic> && data['data'] is Map) {
-        json = Map<String, dynamic>.from(data['data'] as Map);
       }
 
       if (json == null) {
@@ -62,14 +65,14 @@ class ReadingProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchReadings(String deviceId, {int page = 1}) async {
+  Future<void> fetchReadings(String deviceId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final api = await ApiService.getInstance();
-      final res = await api.getReadings(deviceId, page: page);
+      final res = await api.getReadings(deviceId);
 
       if (!res.success || res.data == null) {
         _error = res.message ?? 'Failed to load readings';
@@ -77,14 +80,7 @@ class ReadingProvider extends ChangeNotifier {
       }
 
       final data = res.data;
-      List<dynamic> list;
-      if (data is List) {
-        list = data;
-      } else if (data is Map<String, dynamic> && data['data'] is List) {
-        list = (data['data'] as List).toList();
-      } else {
-        list = <dynamic>[];
-      }
+      final list = data is List ? data : <dynamic>[];
 
       final items = list.map((item) {
         if (item is Map<String, dynamic>) {
@@ -96,13 +92,9 @@ class ReadingProvider extends ChangeNotifier {
         return null;
       }).whereType<Reading>().toList();
 
-      if (page == 1) {
-        _readings
-          ..clear()
-          ..addAll(items);
-      } else {
-        _readings.addAll(items);
-      }
+      _readings
+        ..clear()
+        ..addAll(items);
     } catch (_) {
       _error = 'Failed to load readings';
     } finally {
@@ -111,33 +103,29 @@ class ReadingProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchStatistics(String deviceId, {int hours = 24}) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      final api = await ApiService.getInstance();
-      final res = await api.getStatistics(deviceId, hours: hours);
-
-      if (!res.success || res.data == null) {
-        _error = res.message ?? 'Failed to load statistics';
-        return;
-      }
-
-      if (res.data is Map<String, dynamic>) {
-        _statistics = res.data as Map<String, dynamic>;
-      } else if (res.data is Map) {
-        _statistics = Map<String, dynamic>.from(res.data as Map);
-      } else {
-        _statistics = null;
-      }
-    } catch (_) {
-      _error = 'Failed to load statistics';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+  Future<void> fetchStatistics(String deviceId) async {
+    if (_readings.isEmpty) {
+      await fetchReadings(deviceId);
     }
+
+    if (_readings.isEmpty) {
+      _statistics = null;
+      notifyListeners();
+      return;
+    }
+
+    final total = _readings.fold<int>(0, (sum, item) => sum + item.gasLevelPpm);
+    final average = total / _readings.length;
+    final maxReading = _readings.reduce(
+      (curr, next) => curr.gasLevelPpm >= next.gasLevelPpm ? curr : next,
+    );
+
+    _statistics = <String, dynamic>{
+      'averagePpm': average,
+      'maxPpm': maxReading.gasLevelPpm,
+      'maxTimestamp': maxReading.timestamp.toIso8601String(),
+    };
+    notifyListeners();
   }
 
   void subscribeToLiveReadings(String deviceId) {
