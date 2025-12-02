@@ -37,14 +37,26 @@ class AlertProvider extends ChangeNotifier {
       }
 
       final data = res.data;
-      List<dynamic> list;
-      if (data is List) {
-        list = data;
-      } else if (data is Map<String, dynamic> && data['data'] is List) {
-        list = (data['data'] as List).toList();
-      } else {
-        list = <dynamic>[];
+      List<dynamic> list = <dynamic>[];
+
+      List<dynamic>? _extractList(dynamic source) {
+        if (source is List) {
+          return source;
+        }
+        if (source is Map<String, dynamic>) {
+          if (source['data'] is List) return List<dynamic>.from(source['data'] as List);
+          if (source['alerts'] is List) return List<dynamic>.from(source['alerts'] as List);
+          if (source['items'] is List) return List<dynamic>.from(source['items'] as List);
+          if (source['results'] is List) return List<dynamic>.from(source['results'] as List);
+        }
+        if (source is Map) {
+          final map = Map<String, dynamic>.from(source.cast<dynamic, dynamic>());
+          return _extractList(map);
+        }
+        return null;
       }
+
+      list = _extractList(data) ?? <dynamic>[];
 
       final items = list.map((item) {
         if (item is Map<String, dynamic>) {
@@ -130,6 +142,7 @@ class AlertProvider extends ChangeNotifier {
       if (_unreadCount > 0) {
         _unreadCount -= 1;
       }
+      _error = null;
       notifyListeners();
     } catch (_) {
       _error = 'Failed to acknowledge alert';

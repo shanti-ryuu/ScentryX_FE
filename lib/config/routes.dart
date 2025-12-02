@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/auth/verify_email_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/home/dashboard_screen.dart';
 import '../screens/devices/device_list_screen.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
+  static const String verifyEmail = '/verify-email';
   static const String forgotPassword = '/forgot-password';
   static const String dashboard = '/dashboard';
   static const String deviceList = '/devices';
@@ -31,6 +33,7 @@ class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginScreen(),
     register: (context) => const RegisterScreen(),
+    verifyEmail: (context) => const VerifyEmailScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
     dashboard: (context) => const DashboardScreen(),
     deviceList: (context) => const DeviceListScreen(),

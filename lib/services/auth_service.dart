@@ -30,6 +30,7 @@ class AuthService {
     final res = await _api.register(<String, dynamic>{
       'email': email,
       'password': password,
+      'name': fullName,
       'fullName': fullName,
     });
 
@@ -37,6 +38,7 @@ class AuthService {
       return ApiResponse<User>.error(
         res.message ?? 'Registration failed',
         statusCode: res.statusCode,
+        raw: res.raw,
       );
     }
 
@@ -82,6 +84,7 @@ class AuthService {
       return ApiResponse<User>.error(
         res.message ?? 'Login failed',
         statusCode: res.statusCode,
+        raw: res.raw,
       );
     }
 

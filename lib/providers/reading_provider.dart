@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
 import '../models/reading.dart';
 import '../services/api_service.dart';
 import '../services/firebase_service.dart';
+import '../services/notification_service.dart';
 
 class ReadingProvider extends ChangeNotifier {
   final FirebaseService _firebaseService;
@@ -17,6 +19,9 @@ class ReadingProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   StreamSubscription<Reading?>? _liveSubscription;
+  int? _alertThreshold;
+  String _alertDeviceName = '';
+  bool _alertActive = false;
 
   Reading? get latestReading => _latestReading;
   List<Reading> get readings => List.unmodifiable(_readings);
@@ -57,6 +62,9 @@ class ReadingProvider extends ChangeNotifier {
       }
 
       _latestReading = Reading.fromJson(json);
+      if (_latestReading != null) {
+        _handleAlertForReading(_latestReading!);
+      }
     } catch (_) {
       _error = 'Failed to load latest reading';
     } finally {
@@ -128,25 +136,77 @@ class ReadingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void configureAlertContext({
+    required int threshold,
+    String deviceName = '',
+  }) {
+    _alertThreshold = threshold;
+    _alertDeviceName = deviceName;
+    _alertActive = false;
+  }
+
   void subscribeToLiveReadings(String deviceId) {
+    print('[ReadingProvider] Subscribing to live readings for device: $deviceId');
+    
     _liveSubscription?.cancel();
     _liveSubscription = _firebaseService
         .subscribeToLiveReading(deviceId)
         .listen((reading) {
+      print('[ReadingProvider] Processing new reading: ${reading?.toJson()}');
+      
       _latestReading = reading;
       if (reading != null) {
         _readings.insert(0, reading);
+        print('[ReadingProvider] Added new reading. Total readings: ${_readings.length}');
+        _handleAlertForReading(reading);
+      } else {
+        print('[ReadingProvider] Received null reading');
       }
+      
+      print('[ReadingProvider] Notifying listeners');
       notifyListeners();
-    }, onError: (_) {
-      _error = 'Live updates error';
+    }, onError: (error) {
+      print('[ReadingProvider] Error in live reading stream: $error');
+      _error = 'Live updates error: $error';
       notifyListeners();
+    }, onDone: () {
+      print('[ReadingProvider] Live reading stream closed');
     });
+    
+    print('[ReadingProvider] Successfully subscribed to live readings');
   }
 
   void unsubscribeFromLiveReadings() {
+    print('[ReadingProvider] Unsubscribing from live readings');
     _liveSubscription?.cancel();
     _liveSubscription = null;
+    print('[ReadingProvider] Successfully unsubscribed from live readings');
+  }
+
+  void _handleAlertForReading(Reading reading) {
+    if (_alertThreshold == null) {
+      return;
+    }
+
+    final threshold = math.max(1, _alertThreshold!);
+    final isDanger = reading.gasLevelPpm >= threshold;
+
+    if (isDanger && !_alertActive) {
+      NotificationService().showNotification(
+        title: 'High gas level detected',
+        body:
+            '${_alertDeviceName.isNotEmpty ? _alertDeviceName : reading.deviceId} reached ${reading.gasLevelPpm} ppm (threshold: $threshold)',
+        payload: {
+          'deviceId': reading.deviceId,
+          'ppm': reading.gasLevelPpm.toString(),
+        },
+      );
+      _alertActive = true;
+      print('[ReadingProvider] Alert triggered for ${reading.deviceId} at ${reading.gasLevelPpm} ppm');
+    } else if (!isDanger && _alertActive) {
+      _alertActive = false;
+      print('[ReadingProvider] Gas level back below threshold, alert reset');
+    }
   }
 
   @override

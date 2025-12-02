@@ -66,7 +66,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(storageService),
+          create: (_) => AuthProvider(storageService, firebaseService),
         ),
         ChangeNotifierProvider(
           create: (_) => DeviceProvider(storageService),

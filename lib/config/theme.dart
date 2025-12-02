@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF2196F3);
-  static const Color secondaryColor = Color(0xFF03DAC6);
-  static const Color errorColor = Color(0xFFB00020);
-  static const Color successColor = Color(0xFF4CAF50);
-  static const Color warningColor = Color(0xFFFF9800);
-  static const Color dangerColor = Color(0xFFF44336);
-  static const Color safeColor = Color(0xFF4CAF50);
+  static const Color primaryColor = Color(0xFF5C6FF8);
+  static const Color secondaryColor = Color(0xFF7AE4FF);
+  static const Color errorColor = Color(0xFFEA4E4E);
+  static const Color successColor = Color(0xFF4DD7A6);
+  static const Color warningColor = Color(0xFFFFB347);
+  static const Color dangerColor = Color(0xFFFF6B6B);
+  static const Color safeColor = Color(0xFF4DD7A6);
+
+  static const LinearGradient primaryBackground = LinearGradient(
+    colors: [Color(0xFFF0F4FF), Color(0xFFFDFBFF)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     primaryColor: primaryColor,
-    scaffoldBackgroundColor: Colors.grey[50],
+    scaffoldBackgroundColor: const Color(0xFFF1F4FB),
 
     colorScheme: const ColorScheme.light(
       primary: primaryColor,
@@ -22,7 +28,7 @@ class AppTheme {
       surface: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.black87,
       elevation: 0,
       centerTitle: true,
@@ -39,6 +45,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
+
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
 
         shape: RoundedRectangleBorder(

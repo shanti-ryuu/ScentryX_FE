@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/routes.dart';
+import '../../config/theme.dart';
 import '../../providers/device_provider.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_widget.dart';
@@ -34,8 +35,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     final devices = provider.devices;
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: const Text('My Devices'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -51,53 +55,61 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: Builder(
-          builder: (context) {
-            if (provider.isLoading && devices.isEmpty) {
-              return const LoadingIndicator(fullscreen: true);
-            }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppTheme.primaryBackground,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: Builder(
+              builder: (context) {
+                if (provider.isLoading && devices.isEmpty) {
+                  return const LoadingIndicator(fullscreen: true);
+                }
 
-            if (provider.error != null && devices.isEmpty) {
-              return ErrorView(
-                message: provider.error!,
-                onRetry: _refresh,
-              );
-            }
+                if (provider.error != null && devices.isEmpty) {
+                  return ErrorView(
+                    message: provider.error!,
+                    onRetry: _refresh,
+                  );
+                }
 
-            if (devices.isEmpty) {
-              return const EmptyState(
-                title: 'No devices',
-                message:
-                    'You have no registered devices yet. Add one to get started.',
-              );
-            }
+                if (devices.isEmpty) {
+                  return const EmptyState(
+                    title: 'No devices',
+                    message:
+                        'You have no registered devices yet. Add one to get started.',
+                  );
+                }
 
-            return ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: devices.length,
-              itemBuilder: (context, index) {
-                final device = devices[index];
-                return DeviceCard(
-                  device: device,
-                  onTap: () {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.deviceDetail,
-                      arguments: device.id,
-                    );
-                  },
-                  onSettings: () {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.deviceSettings,
-                      arguments: device.id,
+                return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 8, bottom: 80),
+                  itemCount: devices.length,
+                  itemBuilder: (context, index) {
+                    final device = devices[index];
+                    return DeviceCard(
+                      device: device,
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          AppRoutes.deviceDetail,
+                          arguments: device.id,
+                        );
+                      },
+                      onSettings: () {
+                        Navigator.of(context).pushNamed(
+                          AppRoutes.deviceSettings,
+                          arguments: device.id,
+                        );
+                      },
                     );
                   },
                 );
               },
-            );
-          },
+            ),
+          ),
         ),
       ),
     );

@@ -27,8 +27,9 @@ class ApiService {
     final dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 45),
+        sendTimeout: const Duration(seconds: 45),
+        receiveTimeout: const Duration(minutes: 2),
         headers: <String, dynamic>{
           'Content-Type': 'application/json',
         },
@@ -87,21 +88,44 @@ class ApiService {
 
   ApiResponse<dynamic> _handleError(DioException error) {
     final response = error.response;
+    final statusCode = response?.statusCode;
+
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.connectionError) {
+      return ApiResponse<dynamic>.error(
+        'Server is taking too long to respond. Please try again in a moment.',
+        statusCode: statusCode,
+      );
+    }
+
     if (response != null && response.data is Map<String, dynamic>) {
-      final map = response.data as Map<String, dynamic>;
+      final map = Map<String, dynamic>.from(response.data as Map<String, dynamic>);
       final message = map['message']?.toString() ??
           error.message ??
           'Request failed';
-      final patched = <String, dynamic>{
-        ...map,
-        'message': message,
-      };
-      return ApiResponse<dynamic>.fromJson(patched, (obj) => obj);
+
+      final metaRaw = map['meta'] ?? map['pagination'];
+      Map<String, dynamic>? meta;
+      if (metaRaw is Map<String, dynamic>) {
+        meta = metaRaw;
+      } else if (metaRaw is Map) {
+        meta = metaRaw.map((key, value) => MapEntry(key.toString(), value));
+      }
+
+      return ApiResponse<dynamic>(
+        success: false,
+        message: message,
+        data: map['data'] ?? map['result'],
+        statusCode: statusCode,
+        meta: meta,
+        raw: map,
+      );
     }
 
     return ApiResponse<dynamic>.error(
       error.message ?? 'Network error',
-      statusCode: response?.statusCode,
+      statusCode: statusCode,
     );
   }
 
@@ -163,6 +187,14 @@ class ApiService {
     return _request('POST', '/api/auth/login', data: data);
   }
 
+  Future<ApiResponse<dynamic>> verifyEmail(String token) {
+    return _request('POST', '/api/auth/verify-email/$token');
+  }
+
+  Future<ApiResponse<dynamic>> resendVerification(String email) {
+    return _request('POST', '/api/auth/resend-verification', data: {'email': email});
+  }
+
   Future<ApiResponse<dynamic>> getProfile() {
     return _request('GET', '/api/auth/profile');
   }
@@ -171,11 +203,24 @@ class ApiService {
     return _request('PUT', '/api/auth/profile', data: data);
   }
 
-  Future<ApiResponse<dynamic>> updateFCMToken(String token) {
+  Future<ApiResponse<dynamic>> updateFCMToken(String token, {String? userId}) async {
+    if (userId == null) {
+      // Try to get the user ID from storage
+      final storage = await StorageService.getInstance();
+      final user = storage.getUser();
+      if (user == null || user.id == null) {
+        return ApiResponse<dynamic>.error('User ID is required');
+      }
+      userId = user.id;
+    }
+
     return _request(
       'POST',
       '/api/auth/fcm-token',
-      data: {'token': token},
+      data: {
+        'token': token,
+        'userId': userId,
+      },
     );
   }
 
@@ -241,8 +286,22 @@ class ApiService {
     return _request('GET', '/api/alerts/unread-count');
   }
 
-  Future<ApiResponse<dynamic>> acknowledgeAlert(String alertId) {
-    return _request('POST', '/api/alerts/$alertId/acknowledge');
+  Future<ApiResponse<dynamic>> acknowledgeAlert(String alertId) async {
+    final response = await _request(
+      'POST',
+      '/api/alerts/acknowledge',
+      data: {'alertId': alertId},
+    );
+
+    if (!response.success) {
+      final missingRoute = response.statusCode == 404 ||
+          (response.message?.toLowerCase().contains('not found') ?? false);
+      if (missingRoute) {
+        return _request('POST', '/api/alerts/$alertId/acknowledge');
+      }
+    }
+
+    return response;
   }
 
   Future<ApiResponse<dynamic>> deleteAlert(String alertId) {

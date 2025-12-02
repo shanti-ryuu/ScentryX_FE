@@ -49,14 +49,18 @@ class ApiResponse<T> {
     );
   }
 
-  factory ApiResponse.error(String message, {int? statusCode}) {
+  factory ApiResponse.error(
+    String message, {
+    int? statusCode,
+    dynamic raw,
+  }) {
     return ApiResponse<T>(
       success: false,
       message: message,
       statusCode: statusCode,
       data: null,
       meta: null,
-      raw: null,
+      raw: raw,
     );
   }
 

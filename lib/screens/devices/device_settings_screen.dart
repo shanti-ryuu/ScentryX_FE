@@ -20,6 +20,9 @@ class DeviceSettingsScreen extends StatefulWidget {
 }
 
 class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
+  static const double _minThreshold = 50;
+  static const double _maxThreshold = 1000;
+  static const int _thresholdStep = 50;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _locationController = TextEditingController();
@@ -43,7 +46,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
       _device = device;
       _nameController.text = device.deviceName;
       _locationController.text = device.location;
-      _threshold = device.alertThreshold.toDouble();
+      _threshold = device.alertThreshold
+          .clamp(_minThreshold.toInt(), _maxThreshold.toInt())
+          .toDouble();
     }
     if (mounted) {
       setState(() {
@@ -78,7 +83,9 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
     final data = <String, dynamic>{
       'deviceName': _nameController.text.trim(),
       'location': _locationController.text.trim(),
-      'alertThreshold': _threshold.toInt(),
+      'alertThreshold': _threshold
+          .clamp(_minThreshold, _maxThreshold)
+          .round(),
     };
 
     await provider.updateDevice(device.id, data);
@@ -207,10 +214,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Slider(
-                  value: _threshold,
-                  min: 100,
-                  max: 1000,
-                  divisions: 18,
+                  value: _threshold.clamp(_minThreshold, _maxThreshold),
+                  min: _minThreshold,
+                  max: _maxThreshold,
+                  divisions:
+                      ((_maxThreshold - _minThreshold) ~/ _thresholdStep),
                   label: _threshold.toInt().toString(),
                   onChanged: (value) {
                     setState(() {

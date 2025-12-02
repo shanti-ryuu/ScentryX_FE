@@ -16,29 +16,46 @@ class StatusIndicator extends StatelessWidget {
     final icon = _getStatusIcon(status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color,
-          width: 1.5,
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.18),
+            color.withOpacity(0.08),
+          ],
         ),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showIcon) ...[
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              child: Icon(icon, color: color, size: 16),
+            ),
+            const SizedBox(width: 10),
           ],
           Text(
             status.toUpperCase(),
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.1,
+                ),
           ),
         ],
       ),
@@ -48,15 +65,15 @@ class StatusIndicator extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'safe':
-        return Colors.green;
+        return const Color(0xFF2E7D32);
       case 'warning':
-        return Colors.orange;
+        return const Color(0xFFFFB300);
       case 'danger':
-        return Colors.red;
+        return const Color(0xFFE53935);
       case 'offline':
-        return Colors.grey;
+        return Colors.blueGrey;
       default:
-        return Colors.grey;
+        return Colors.blueGrey;
     }
   }
 

@@ -19,63 +19,76 @@ class QuickStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final bgColor =
-        color?.withValues(alpha: 0.08) ?? scheme.primary.withValues(alpha: 0.05);
     final accent = color ?? scheme.primary;
+    final baseBackground = Colors.white.withOpacity(0.9);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            accent.withOpacity(0.18),
+            baseBackground,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withOpacity(0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withOpacity(0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (icon != null) ...[
               Container(
-                padding: const EdgeInsets.all(6),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.85),
                 ),
                 child: Icon(
                   icon,
-                  size: 18,
+                  size: 22,
                   color: accent,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 14),
             ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[700],
+                    title.toUpperCase(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          letterSpacing: 1.1,
+                          color: Colors.blueGrey[700],
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     value,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: accent,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
                         ),
                   ),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.grey[600]),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.black54,
+                          ),
                     ),
                   ],
                 ],

@@ -14,6 +14,9 @@ class AddDeviceScreen extends StatefulWidget {
 }
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
+  static const double _minThreshold = 50;
+  static const double _maxThreshold = 1000;
+  static const int _thresholdStep = 50;
   final _formKey = GlobalKey<FormState>();
   final _macController = TextEditingController();
   final _nameController = TextEditingController();
@@ -57,7 +60,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       'deviceName': name,
       'name': name,
       'location': _locationController.text.trim(),
-      'alertThreshold': _threshold.toInt(),
+      'alertThreshold': _threshold
+          .clamp(_minThreshold, _maxThreshold)
+          .round(),
     };
 
     final device = await provider.registerDevice(data);
@@ -133,10 +138,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Slider(
-                  value: _threshold,
-                  min: 100,
-                  max: 1000,
-                  divisions: 18,
+                  value: _threshold.clamp(_minThreshold, _maxThreshold),
+                  min: _minThreshold,
+                  max: _maxThreshold,
+                  divisions:
+                      ((_maxThreshold - _minThreshold) ~/ _thresholdStep),
                   label: _threshold.toInt().toString(),
                   onChanged: (value) {
                     setState(() {
