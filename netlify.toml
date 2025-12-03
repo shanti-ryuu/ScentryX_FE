@@ -1,8 +1,24 @@
 [build]
+[build]
   command = "bash ./scripts/netlify-build.sh"
   publish = "build/web"
+  environment = { NODE_VERSION = "16" }
+
+[build.environment]
+  NODE_VERSION = "16"
+  FLUTTER_ROOT = "/opt/buildhome/.flutter"
+  PUB_CACHE = "/opt/buildhome/.pub-cache"
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.html]
+  pretty_urls = true
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
