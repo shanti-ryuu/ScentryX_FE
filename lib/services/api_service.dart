@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import '../config/constants.dart';
 import '../models/api_response.dart';
 import 'storage_service.dart';
 
@@ -23,16 +22,23 @@ class ApiService {
 
     String baseUrl;
     try {
-      // Try build-time environment variable first
+      // Use build-time environment variable first (works for all platforms)
       baseUrl = const String.fromEnvironment(
         'API_BASE_URL',
         defaultValue: 'https://scentryx-backend.onrender.com',
       );
-      
-      // Fall back to .env file if needed (for development)
-      if (baseUrl.isEmpty || baseUrl == 'https://scentryx-backend.onrender.com') {
+
+      // For non-web builds only, optionally fall back to .env during development.
+      // On web this would try to load assets/.env and cause 404/blank screen, so
+      // we explicitly skip dotenv on kIsWeb.
+      if (!kIsWeb &&
+          (baseUrl.isEmpty ||
+              baseUrl == 'https://scentryx-backend.onrender.com')) {
         await dotenv.load();
-        baseUrl = dotenv.get('API_BASE_URL', fallback: 'https://scentryx-backend.onrender.com');
+        baseUrl = dotenv.get(
+          'API_BASE_URL',
+          fallback: 'https://scentryx-backend.onrender.com',
+        );
       }
     } catch (e) {
       baseUrl = 'https://scentryx-backend.onrender.com';
