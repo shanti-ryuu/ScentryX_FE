@@ -91,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen>
                 'Gas Leak Detection System',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white.withOpacity(0.9),
                   letterSpacing: 0.5,
                 ),
               ),
