@@ -1,19 +1,16 @@
 [build]
-  command = "bash ./scripts/netlify-build.sh"
   publish = "build/web"
-
-[build.environment]
-  NODE_VERSION = "16"
-  FLUTTER_ROOT = "/opt/buildhome/.flutter"
-  PUB_CACHE = "/opt/buildhome/.pub-cache"
-
-[build.processing]
-  skip_processing = false
-
-[build.processing.html]
-  pretty_urls = true
+  command = "echo 'Build handled by GitHub Actions'"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
