@@ -21,9 +21,27 @@ class ApiService {
       return _instance!;
     }
 
-    final envValue = dotenv.env['API_BASE_URL'];
-    final baseUrl = AppConstants.resolveApiBaseUrl(envValue);
+    String baseUrl;
+    try {
+      // Try build-time environment variable first
+      baseUrl = const String.fromEnvironment(
+        'API_BASE_URL',
+        defaultValue: 'https://scentryx-backend.onrender.com',
+      );
+      
+      // Fall back to .env file if needed (for development)
+      if (baseUrl.isEmpty || baseUrl == 'https://scentryx-backend.onrender.com') {
+        await dotenv.load();
+        baseUrl = dotenv.get('API_BASE_URL', fallback: 'https://scentryx-backend.onrender.com');
+      }
+    } catch (e) {
+      baseUrl = 'https://scentryx-backend.onrender.com';
+    }
 
+    // Remove trailing slashes and add a single slash at the end
+    baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    
+    // Initialize Dio with the base URL
     final dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -136,36 +154,38 @@ class ApiService {
     Map<String, dynamic>? query,
   }) async {
     try {
+      // Ensure path starts with a single slash
+      final fullPath = path.startsWith('/') ? path : '/$path';
       Response<dynamic> response;
       switch (method) {
         case 'GET':
           response =
-              await _dio.get<dynamic>(path, queryParameters: query);
+              await _dio.get<dynamic>(fullPath, queryParameters: query);
           break;
         case 'POST':
           response = await _dio.post<dynamic>(
-            path,
+            fullPath,
             data: data,
             queryParameters: query,
           );
           break;
         case 'PUT':
           response = await _dio.put<dynamic>(
-            path,
+            fullPath,
             data: data,
             queryParameters: query,
           );
           break;
         case 'DELETE':
           response = await _dio.delete<dynamic>(
-            path,
+            fullPath,
             data: data,
             queryParameters: query,
           );
           break;
         default:
           response = await _dio.request<dynamic>(
-            path,
+            fullPath,
             data: data,
             queryParameters: query,
             options: Options(method: method),

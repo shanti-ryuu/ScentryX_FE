@@ -18,10 +18,10 @@ fi
 # Enable Flutter web
 flutter config --enable-web
 
-# Create .env file
+# In scripts/netlify-build.sh, update the .env creation part to:
 cat > .env <<EOF
-API_BASE_URL=${API_BASE_URL:-https://scentryx-backend.onrender.com}
-FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-scentryx-13554}
+API_BASE_URL=https://scentryx-backend.onrender.com/api
+FIREBASE_PROJECT_ID=scentryx-13554
 EOF
 
 # Get dependencies and build
