@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Check if Flutter is installed, if not, use Flutter from cache
 if ! command -v flutter >/dev/null 2>&1; then
   echo "Installing Flutter SDK..."
-  # Use a specific version that we know works
-  FLUTTER_VERSION="3.13.9"  # Using a stable version
-  FLUTTER_ZIP="flutter_linux_${FLUTTER_VERSION}-stable_$TARGETARCH.tar.xz"
+  # Use a specific Flutter version
+  FLUTTER_VERSION="3.13.9"
+  FLUTTER_ARCHIVE="flutter_linux_${FLUTTER_VERSION}-stable_linux-x64.tar.xz"
   
   # Download and extract Flutter
-  wget -q "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$FLUTTER_ZIP"
-  tar -xf "$FLUTTER_ZIP" -C "$HOME"
+  wget -q "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/$FLUTTER_ARCHIVE"
+  tar -xf "$FLUTTER_ARCHIVE" -C "$HOME"
   export PATH="$HOME/flutter/bin:$PATH"
   flutter --version
 fi
@@ -18,7 +17,7 @@ fi
 # Enable Flutter web
 flutter config --enable-web
 
-# In scripts/netlify-build.sh, update the .env creation part to:
+# Create .env file
 cat > .env <<EOF
 API_BASE_URL=https://scentryx-backend.onrender.com/api
 FIREBASE_PROJECT_ID=scentryx-13554
