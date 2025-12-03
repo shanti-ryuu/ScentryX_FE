@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: '.env');
+  // Only load .env on non-web platforms. On web this would try to fetch
+  // assets/.env and cause a 404/blank screen, and we already use
+  // compile-time defines for API_BASE_URL there.
+  if (!kIsWeb) {
+    await dotenv.load(fileName: '.env');
+  }
 
   await Firebase.initializeApp(
     options: FirebaseOptions(
