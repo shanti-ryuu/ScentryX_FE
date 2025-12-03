@@ -1,6 +1,8 @@
 [build]
-  publish = "build/web"
+  # This command will be overridden by GitHub Actions
   command = "echo 'Build handled by GitHub Actions'"
+  # This is where GitHub Actions will place the built files
+  publish = "build/web"
 
 [[redirects]]
   from = "/*"
